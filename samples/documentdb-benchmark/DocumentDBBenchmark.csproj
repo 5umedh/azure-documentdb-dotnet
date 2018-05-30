@@ -55,6 +55,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\CustomerOrder.cs" />
+    <Compile Include="Domain\CustomerSubscription.cs" />
+    <Compile Include="Domain\Entitlement.cs" />
+    <Compile Include="Domain\Order.cs" />
+    <Compile Include="Domain\OrderSubscriptionSortingField.cs" />
+    <Compile Include="Domain\OrderSubscriptionWithPaginationSort.cs" />
+    <Compile Include="Domain\Subscription.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -65,7 +72,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-    <None Include="Player.json">
+    <None Include="order.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

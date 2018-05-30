@@ -13,6 +13,7 @@
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
     using Newtonsoft.Json;
+    using StreamOneOrderService.Domain;
 
     /// <summary>
     /// This sample demonstrates how to achieve high performance writes using DocumentDB.
@@ -23,17 +24,17 @@
         private static readonly string DataCollectionName = ConfigurationManager.AppSettings["CollectionName"];
         private static readonly int CollectionThroughput = int.Parse(ConfigurationManager.AppSettings["CollectionThroughput"]);
 
-        private static readonly ConnectionPolicy ConnectionPolicy = new ConnectionPolicy 
-        { 
-            ConnectionMode = ConnectionMode.Direct, 
-            ConnectionProtocol = Protocol.Tcp, 
-            RequestTimeout = new TimeSpan(1, 0, 0), 
-            MaxConnectionLimit = 1000, 
-            RetryOptions = new RetryOptions 
-            { 
+        private static readonly ConnectionPolicy ConnectionPolicy = new ConnectionPolicy
+        {
+            ConnectionMode = ConnectionMode.Direct,
+            ConnectionProtocol = Protocol.Tcp,
+            RequestTimeout = new TimeSpan(1, 0, 0),
+            MaxConnectionLimit = 1000,
+            RetryOptions = new RetryOptions
+            {
                 MaxRetryAttemptsOnThrottledRequests = 10,
                 MaxRetryWaitTimeInSeconds = 60
-            } 
+            }
         };
 
         private static readonly string InstanceId = Dns.GetHostEntry("LocalHost").HostName + Process.GetCurrentProcess().Id;
@@ -82,9 +83,12 @@
                     authKey,
                     ConnectionPolicy))
                 {
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
                     var program = new Program(client);
                     program.RunAsync().Wait();
-                    Console.WriteLine("DocumentDBBenchmark completed successfully.");
+                    sw.Stop();
+                    Console.WriteLine(string.Format("DocumentDBBenchmark completed successfully in {0}.", (sw.Elapsed.TotalMilliseconds / 1000) + " seconds."));
                 }
             }
 
@@ -110,20 +114,25 @@
         /// <returns>a Task object.</returns>
         private async Task RunAsync()
         {
-            
+
             DocumentCollection dataCollection = GetCollectionIfExists(DatabaseName, DataCollectionName);
             int currentCollectionThroughput = 0;
 
             if (bool.Parse(ConfigurationManager.AppSettings["ShouldCleanupOnStart"]) || dataCollection == null)
             {
                 Database database = GetDatabaseIfExists(DatabaseName);
-                if (database != null)
+
+                if (database != null && bool.Parse(ConfigurationManager.AppSettings["ShouldCleanupOnStart"]))
                 {
                     await client.DeleteDatabaseAsync(database.SelfLink);
                 }
 
-                Console.WriteLine("Creating database {0}", DatabaseName);
-                database = await client.CreateDatabaseAsync(new Database { Id = DatabaseName });
+                // create DB if it does not exist
+                if (database == null)
+                {
+                    Console.WriteLine("Creating database {0}", DatabaseName);
+                    database = await client.CreateDatabaseAsync(new Database { Id = DatabaseName });
+                }
 
                 Console.WriteLine("Creating collection {0} with {1} RU/s", DataCollectionName, CollectionThroughput);
                 dataCollection = await this.CreatePartitionedCollectionAsync(DatabaseName, DataCollectionName);
@@ -178,18 +187,19 @@
         {
             requestUnitsConsumed[taskId] = 0;
             string partitionKeyProperty = collection.PartitionKey.Paths[0].Replace("/", "");
-            Dictionary<string, object> newDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(sampleJson);
+            var order = JsonConvert.DeserializeObject<Order>(sampleJson);
+            var originalResellerKey = order.ResellerKey;
 
             for (var i = 0; i < numberOfDocumentsToInsert; i++)
             {
-                newDictionary["id"] = Guid.NewGuid().ToString();
-                newDictionary[partitionKeyProperty] = Guid.NewGuid().ToString();
+                order.Id = Guid.NewGuid().ToString();
+                order.ResellerKey = originalResellerKey + i % 5;
 
                 try
                 {
                     ResourceResponse<Document> response = await client.CreateDocumentAsync(
                             UriFactory.CreateDocumentCollectionUri(DatabaseName, DataCollectionName),
-                            newDictionary,
+                            order,
                             new RequestOptions() { });
 
                     string partition = response.SessionToken.Split(':')[0];
@@ -203,7 +213,7 @@
                         DocumentClientException de = (DocumentClientException)e;
                         if (de.StatusCode != HttpStatusCode.Forbidden)
                         {
-                            Trace.TraceError("Failed to write {0}. Exception was {1}", JsonConvert.SerializeObject(newDictionary), e);
+                            Trace.TraceError("Failed to write {0}. Exception was {1}", JsonConvert.SerializeObject(order), e);
                         }
                         else
                         {
@@ -289,8 +299,8 @@
             Console.ReadLine();
 
             return await client.CreateDocumentCollectionAsync(
-                    UriFactory.CreateDatabaseUri(databaseName), 
-                    collection, 
+                    UriFactory.CreateDatabaseUri(databaseName),
+                    collection,
                     new RequestOptions { OfferThroughput = CollectionThroughput });
         }
 

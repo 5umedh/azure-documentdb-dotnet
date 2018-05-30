@@ -1,0 +1,56 @@
+﻿{
+    "id": "e582b21f-4633-4599-a542-acd383d98304",
+    "orderKey": "Ord_dce3e9a7-699b-4aa2-8777-cbef1604cdcd",
+    "resellerKey": "techdata",
+    "orderStatus": "Failed",
+    "poNumber": "PO_2892018055451",
+    "orderLines": [
+        {
+            "orderLineId": "ebbfa99e-9fca-4fdf-a578-015b74b2cb90",
+            "vendorProductConfigKey": "bd938f12-058f-4927-bba3-ae36b1d2501c",
+            "productName": "Office 365 CSP Business and Enterprise Suites - Standard and Select Support",
+            "productKey": "Office_365_CSP_Business_and_Enterprise_Suites-Standard_and_Select_Support",
+            "vendorKey": "Microsoft",
+            "productConfigKey": "SK22676",
+            "quantity": 1,
+            "price": 500,
+            "customerKey": "4a66b175-849a-4a7d-8b70-862cc8e53095",
+            "customerContactId": "a46d9ce8-c863-47ef-a50f-986db06e3d42",
+            "customerId": "35db778d-5e90-4776-a3bd-993f90977450",
+            "companyName": "We do Wonders - 2",
+            "firstName": "Sid",
+            "lastName": "jain",
+            "phoneNumber": "8135901265",
+            "emailAddress": "wedowonders123345@ms.com",
+            "addressLine1": "33456",
+            "addressLine2": "Anderson Road",
+            "city": "Tampa",
+            "state": "FL",
+            "country": "US",
+            "zipCode": "33635",
+            "productProvisionType": "EndUser",
+            "provisionedOnUtc": "0001-01-01T00:00:00",
+            "createdOnUtc": "2018-05-28T09:54:52.5347259+00:00",
+            "updatedOnUtc": "2018-05-28T09:54:52.5347259+00:00",
+            "orderLineStatus": "InProgress",
+            "billingFrequency": 1,
+            "billingType": 1,
+            "customerSettings": {
+													"settings": {
+														"domain": "zxcds.onmicrosoft.com"
+													}
+            },
+            "resellerSettings": {
+                "settings": {
+                    "reseller_key": "techdata",
+                    "mpnid": "3440150"
+                }
+            }
+        }
+    ],
+    "provisionedOnUtc": "2018-05-28T09:55:04.9688518Z",
+    "createdOnUtc": "2018-05-28T09:54:52.5347259Z",
+    "updatedOnUtc": "2018-05-28T09:55:04.9688518Z",
+    "createdBy": "TD9999",
+    "paymentMethodType": 1
+}
